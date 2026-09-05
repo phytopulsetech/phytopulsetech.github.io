@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PhytoPulse — Interactive Demo (Mock Data)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EA;
+    --surface:#FFFFFF;
+    --ink:#1C2422;
+    --muted:#69766D;
+    --primary:#1B5E3A;
+    --primary-dark:#123D27;
+    --accent:#E0932E;
+    --leaf:#2F9E63;
+    --leaf-bg:#E7F3EA;
+    --amber-bg:#FBF1DE;
+    --alert:#B23A2E;
+    --alert-bg:#F8E4DF;
+    --line:#E2DCC8;
+    --radius:24px;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(27,94,58,0.05), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(224,147,46,0.07), transparent 42%);
+    pointer-events:none;
+    z-index:0;
+  }
+  button{font-family:inherit;}
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:1200px;
+    margin:0 auto;
+    padding:34px 24px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .page-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand svg{width:30px;height:30px;flex:none;}
+  .brand-name{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:-0.01em;
+  }
+  .brand-name span{color:var(--accent);}
+  .demo-tag{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--primary-dark);
+    background:var(--leaf-bg);
+    border:1px solid #cfe6d6;
+    padding:6px 12px;
+    border-radius:100px;
+  }
+  .page-sub{
+    max-width:640px;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.55;
+    margin:14px 0 0;
+  }
+
+  /* ---------- Stage layout ---------- */
+  .stage{
+    display:grid;
+    grid-template-columns:1fr min(340px, 34vw) 1fr;
+    align-items:center;
+    gap:28px;
+    margin-top:40px;
+  }
+  .callouts{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .callouts.right{align-items:flex-start;}
+  .callouts.left{align-items:flex-end;}
+  .callout{
+    max-width:230px;
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--primary-dark);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    position:relative;
+  }
+  .callouts.left .callout{text-align:right;}
+  .callout b{color:var(--primary);}
+
+  /* ---------- Phone frame ---------- */
+  .phone-wrap{
+    display:flex;
+    justify-content:center;
+    animation:riseIn .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes riseIn{
+    from{opacity:0; transform:translateY(18px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .phone{
+    width:340px;
+    max-width:100%;
+    height:700px;
+    background:#0d1a13;
+    border-radius:46px;
+    padding:12px;
+    box-shadow:0 30px 60px -20px rgba(18,61,39,0.35), 0 3px 0 rgba(0,0,0,0.05) inset;
+    position:relative;
+  }
+  .phone-screen{
+    background:var(--surface);
+    width:100%;
+    height:100%;
+    border-radius:34px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute;
+    top:12px; left:50%; transform:translateX(-50%);
+    width:90px; height:22px;
+    background:#0d1a13;
+    border-radius:0 0 16px 16px;
+    z-index:20;
+  }
+  .statusbar{
+    height:40px;
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:#fff;
+    background:var(--primary-dark);
+  }
+  .statusbar .ble{display:flex; align-items:center; gap:5px;}
+  .statusbar .ble svg{width:12px;height:12px;}
+
+  /* ---------- Connect screen ---------- */
+  .connect-screen{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:28px 26px;
+    background:linear-gradient(180deg, var(--primary-dark), var(--primary) 62%);
+    color:#fff;
+    gap:6px;
+  }
+  .connect-screen .glyph{
+    width:64px;height:64px;
+    margin-bottom:10px;
+    animation:floaty 3.4s ease-in-out infinite;
+  }
+  @keyframes floaty{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-6px);}
+  }
+  .connect-screen h1{
+    font-family:var(--font-display);
+    font-size:21px;
+    margin:6px 0 4px;
+  }
+  .connect-screen p{
+    font-size:13.5px;
+    line-height:1.55;
+    color:#dfeee3;
+    max-width:250px;
+    margin:0 0 22px;
+  }
+  .btn{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    border-radius:100px;
+    padding:13px 22px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-accent{background:var(--accent); color:#3a2205;}
+  .btn-accent:hover{box-shadow:0 8px 18px -6px rgba(224,147,46,0.55);}
+  .btn-ghost{background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.35);}
+  .btn-outline{background:transparent; color:var(--primary); border:1.5px solid var(--primary);}
+  .btn-outline:hover{background:var(--leaf-bg);}
+  .btn-small{padding:8px 14px; font-size:12.5px;}
+
+  .scan-status{
+    margin-top:22px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:#dfeee3;
+    min-height:18px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .spinner{
+    width:13px;height:13px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.35);
+    border-top-color:#fff;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .found-device{
+    margin-top:18px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.28);
+    border-radius:16px;
+    padding:14px 16px;
+    display:none;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    max-width:260px;
+    text-align:left;
+    animation:riseIn .4s ease both;
+  }
+  .found-device.show{display:flex;}
+  .found-device .name{font-family:var(--font-mono); font-size:12.5px;}
+  .found-device .sub{font-size:11.5px; color:#cfe6d6;}
+
+  /* ---------- App main ---------- */
+  .app-main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    animation:riseIn .5s ease both;
+  }
+  .app-header{
+    flex:none;
+    padding:14px 18px 12px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .app-header .who{display:flex; flex-direction:column; gap:2px;}
+  .app-header .crop{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:15px;
+  }
+  .app-header .node{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--muted);
+  }
+  .conn-pill{
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--primary-dark);
+    background:var(--leaf-bg);
+    padding:5px 10px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+  }
+  .conn-dot{width:6px;height:6px;border-radius:50%;background:var(--leaf); flex:none;}
+  .conn-dot.pulse{animation:dotpulse 1.6s ease-in-out infinite;}
+  @keyframes dotpulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(47,158,99,0.5);}
+    50%{box-shadow:0 0 0 5px rgba(47,158,99,0);}
+  }
+
+  .screens{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:18px 18px 10px;
+  }
+  .screen[hidden]{display:none;}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 4px;
+  }
+  .screen h2{
+    font-family:var(--font-display);
+    font-size:17px;
+    margin:0 0 14px;
+  }
+
+  /* ---- Scan screen ---- */
+  .wave-card{
+    background:var(--primary-dark);
+    border-radius:18px;
+    padding:14px 6px 6px;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .wave-card svg{display:block; width:100%; height:64px;}
+  .wave-label{
+    position:absolute; top:12px; left:16px;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:#bcd9c6;
+    letter-spacing:0.05em;
+  }
+  .readings{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .reading-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:12px 14px;
+  }
+  .reading-card .rlabel{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .reading-card .rvalue{
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:20px;
+    color:var(--primary-dark);
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+  }
+  .reading-card .runit{font-size:11px; color:var(--muted); font-weight:400;}
+  .rtrend{font-size:10.5px; margin-top:3px; display:inline-flex; gap:3px; align-items:center;}
+  .rtrend.up{color:var(--alert);}
+  .rtrend.flat{color:var(--leaf);}
+
+  .badge{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:14px;
+    border:1px solid transparent;
+  }
+  .badge .dot{width:9px;height:9px;border-radius:50%; margin-top:5px; flex:none;}
+  .badge h3{font-family:var(--font-display); font-size:14px; margin:0 0 3px;}
+  .badge p{font-size:12.5px; line-height:1.5; margin:0; color:var(--muted);}
+  .badge .conf{font-family:var(--font-mono); font-size:10.5px; margin-top:6px; display:block;}
+  .badge.status-healthy{background:var(--leaf-bg); border-color:#cfe6d6;}
+  .badge.status-healthy .dot{background:var(--leaf);}
+  .badge.status-moderate{background:var(--amber-bg); border-color:#f0dab3;}
+  .badge.status-moderate .dot{background:var(--accent);}
+  .badge.status-severe{background:var(--alert-bg); border-color:#efc7bd;}
+  .badge.status-severe .dot{background:var(--alert);}
+
+  .scan-actions{display:flex; gap:8px;}
+
+  /* ---- Field map screen ---- */
+  .map-summary{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:14px;
+    line-height:1.5;
+  }
+  .map-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .leaf-node{
+    aspect-ratio:1;
+    border-radius:14px;
+    border:1.5px solid transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--font-mono);
+    font-size:11px;
+    cursor:pointer;
+    color:#fff;
+    transition:transform .12s ease;
+  }
+  .leaf-node:hover, .leaf-node:focus-visible{transform:scale(1.06);}
+  .leaf-node.healthy{background:var(--leaf);}
+  .leaf-node.moderate{background:var(--accent); color:#3a2205;}
+  .leaf-node.severe{background:var(--alert);}
+  .map-legend{
+    display:flex;
+    gap:14px;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .map-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .swatch{width:9px;height:9px;border-radius:3px;}
+  .swatch.healthy{background:var(--leaf);}
+  .swatch.moderate{background:var(--accent);}
+  .swatch.severe{background:var(--alert);}
+  .node-detail{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    font-size:12.5px;
+    line-height:1.6;
+    min-height:66px;
+  }
+  .node-detail .nd-title{font-family:var(--font-display); font-size:13.5px; margin-bottom:2px;}
+  .node-detail .nd-empty{color:var(--muted);}
+
+  /* ---- History screen ---- */
+  .chart-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px 10px 8px;
+    margin-bottom:14px;
+  }
+  .chart-card svg{width:100%; height:auto; display:block;}
+  .chart-legend{
+    display:flex;
+    gap:14px;
+    font-size:11px;
+    color:var(--muted);
+    padding:0 4px;
+    flex-wrap:wrap;
+  }
+  .chart-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .line-swatch{width:12px; height:2px; border-radius:2px;}
+  .history-note{
+    font-size:12px;
+    line-height:1.6;
+    color:var(--muted);
+    background:var(--leaf-bg);
+    border-radius:14px;
+    padding:12px 14px;
+  }
+  .history-note b{color:var(--primary-dark);}
+
+  /* ---- Advisory screen ---- */
+  .advisory-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:13px 14px;
+    margin-bottom:10px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .advisory-card.done{opacity:0.5;}
+  .advisory-card.done .adv-title{text-decoration:line-through;}
+  .adv-check{
+    width:22px;height:22px;
+    border-radius:7px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    flex:none;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    font-size:13px;
+    margin-top:1px;
+  }
+  .advisory-card.done .adv-check{background:var(--leaf); border-color:var(--leaf);}
+  .adv-body{flex:1;}
+  .adv-title{font-family:var(--font-display); font-size:13.5px; margin-bottom:3px;}
+  .adv-desc{font-size:12px; color:var(--muted); line-height:1.5;}
+  .adv-tag{
+    display:inline-block;
+    margin-top:7px;
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:100px;
+  }
+  .adv-tag.high{background:var(--alert-bg); color:var(--alert);}
+  .adv-tag.medium{background:var(--amber-bg); color:#8a5c14;}
+  .adv-tag.low{background:var(--leaf-bg); color:var(--primary-dark);}
+
+  /* ---- Tab bar ---- */
+  .tabbar{
+    flex:none;
+    display:flex;
+    border-top:1px solid var(--line);
+    background:var(--surface);
+    padding:8px 6px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .tab{
+    flex:1;
+    background:none;
+    border:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:6px 2px;
+    font-size:10.5px;
+    color:var(--muted);
+    cursor:pointer;
+    border-radius:12px;
+  }
+  .tab svg{width:19px; height:19px;}
+  .tab.active{color:var(--primary);}
+  .tab.active svg{stroke:var(--primary);}
+
+  /* ---------- Footer ---------- */
+  .page-foot{
+    margin-top:46px;
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 980px){
+    .stage{grid-template-columns:1fr;}
+    .callouts{flex-direction:row; flex-wrap:wrap; justify-content:center;}
+    .callouts.left, .callouts.right{align-items:stretch;}
+    .callouts.left .callout, .callouts.right .callout{text-align:left; max-width:260px;}
+    .callouts{order:2;}
+    .phone-wrap{order:1;}
+  }
+  @media (max-width: 420px){
+    .phone{height:640px; border-radius:38px;}
+    .phone-screen{border-radius:28px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="page-head">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 12 C25 30 25 70 50 88 C75 70 75 30 50 12 Z" stroke="#1B5E3A" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M8 50 H34 L40 32 L48 66 L56 50 H92" stroke="#E0932E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Phyto<span>Pulse</span></span>
+    </div>
+    <span class="demo-tag">● Live demo — mock data</span>
+  </header>
+
+  <p class="page-sub">A walkthrough of the farmer-facing app, from pairing a leaf sensor to getting a field-level recommendation. Every reading, node and chart below is simulated for illustration — no real hardware is connected.</p>
+
+  <div class="stage">
+    <div class="callouts left">
+      <div class="callout"><b>No gateway hardware.</b> The sensor pairs straight to this browser tab over Bluetooth.</div>
+      <div class="callout"><b>On-device inference.</b> Nothing you see here has left this screen.</div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="phone-screen">
+          <div class="statusbar">
+            <span>9:41</span>
+            <span class="ble" id="statusBle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/></svg>
+              <span id="statusBleText">Not paired</span>
+            </span>
+          </div>
+
+          <!-- CONNECT SCREEN -->
+          <div class="connect-screen" id="connectScreen">
+            <svg class="glyph" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M50 12 C25 30 25 70 50 88 C75 70 75 30 50 12 Z" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" opacity="0.9"/>
+              <path d="M8 50 H34 L40 32 L48 66 L56 50 H92" stroke="#E0932E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h1>Connect your sensor</h1>
+            <p>PhytoPulse pairs directly with this browser over Bluetooth — nothing to install from an app store.</p>
+            <button class="btn btn-accent" id="btnConnect">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a2205" stroke-width="2.4"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/></svg>
+              Connect via Bluetooth
+            </button>
+            <div class="scan-status" id="scanStatus"></div>
+            <div class="found-device" id="foundDevice">
+              <div>
+                <div class="name">PhytoPulse-Clip · 04B2</div>
+                <div class="sub">Tomato · Polyhouse Block C</div>
+              </div>
+              <button class="btn btn-ghost btn-small" id="btnPair">Pair device</button>
+            </div>
+          </div>
+
+          <!-- APP MAIN -->
+          <div class="app-main" id="appMain" hidden>
+            <div class="app-header">
+              <div class="who">
+                <span class="crop">Tomato · Block C</span>
+                <span class="node">NODE 04B2 · LEAF-CLIP</span>
+              </div>
+              <button class="conn-pill" id="btnDisconnect" title="Tap to disconnect">
+                <span class="conn-dot pulse"></span> Connected
+              </button>
+            </div>
+
+            <div class="screens">
+
+              <!-- SCAN -->
+              <section class="screen" id="screen-scan">
+                <p class="eyebrow">Current scan</p>
+                <h2>Leaf VOC reading</h2>
+
+                <div class="wave-card">
+                  <span class="wave-label">METHANOL + TERPENE SIGNAL</span>
+                  <svg viewBox="0 0 300 64" preserveAspectRatio="none">
+                    <polyline id="waveLine" points="" fill="none" stroke="#E0932E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+
+                <div class="readings">
+                  <div class="reading-card">
+                    <div class="rlabel">Methanol</div>
+                    <div class="rvalue"><span id="valMethanol">3.6</span><span class="runit">ppm</span></div>
+                    <div class="rtrend flat" id="trendMethanol">— vs. 3.8 ppm baseline</div>
+                  </div>
+                  <div class="reading-card">
+                    <div class="rlabel">α-Pinene (terpene)</div>
+                    <div class="rvalue"><span id="valTerpene">540</span><span class="runit">ppb</span></div>
+                    <div class="rtrend flat" id="trendTerpene">— vs. 530 ppb baseline</div>
+                  </div>
+                </div>
+
+                <div class="badge status-healthy" id="statusBadge">
+                  <span class="dot"></span>
+                  <div>
+                    <h3 id="badgeTitle">Healthy — no stress detected</h3>
+                    <p id="badgeDesc">Readings fall within the normal range for this cultivar and growth stage.</p>
+                    <span class="conf" id="badgeConf">Confidence: 94%</span>
+                  </div>
+                </div>
+
+                <div class="scan-actions">
+                  <button class="btn btn-accent" id="btnSimulate">↻ Simulate new scan</button>
+                </div>
+              </section>
+
+              <!-- MAP -->
+              <section class="screen" id="screen-map" hidden>
+                <p class="eyebrow">Multi-leaf session</p>
+                <h2>Block C field map</h2>
+                <p class="map-summary" id="mapSummary">14 leaves sampled in one walk-through. 9 healthy · 4 moderate stress · 1 severe — Zone B trending down since Tuesday.</p>
+                <div class="map-legend">
+                  <span><i class="swatch healthy"></i> Healthy</span>
+                  <span><i class="swatch moderate"></i> Moderate stress</span>
+                  <span><i class="swatch severe"></i> Severe stress</span>
+                </div>
+                <div class="map-grid" id="mapGrid"></div>
+                <div class="node-detail" id="nodeDetail"><span class="nd-empty">Tap a leaf above to see its reading.</span></div>
+              </section>
+
+              <!-- HISTORY -->
+              <section class="screen" id="screen-history" hidden>
+                <p class="eyebrow">14-day trend</p>
+                <h2>Methanol vs. alert threshold</h2>
+                <div class="chart-card">
+                  <svg viewBox="0 0 300 150" preserveAspectRatio="none" id="historyChart"></svg>
+                  <div class="chart-legend">
+                    <span><i class="line-swatch" style="background:#1B5E3A"></i> Methanol (ppm)</span>
+                    <span><i class="line-swatch" style="background:#B23A2E; opacity:0.6"></i> Alert threshold</span>
+                  </div>
+                </div>
+                <div class="history-note"><b>PhytoPulse alerted on Day 9.</b> The field scout didn't note visible chlorosis until Day 12 — a 3-day head start on a fertigation decision.</div>
+              </section>
+
+              <!-- ADVISORY -->
+              <section class="screen" id="screen-advisory" hidden>
+                <p class="eyebrow">Recommended actions</p>
+                <h2>Today's advisory</h2>
+
+                <div class="advisory-card" data-card="1">
+                  <button class="adv-check" data-check="1">✓</button>
+                  <div class="adv-body">
+                    <div class="adv-title">Apply nitrogen top-dressing — Zone B</div>
+                    <div class="adv-desc">20 kg/acre urea recommended within 3 days based on sustained methanol elevation.</div>
+                    <span class="adv-tag high">High priority</span>
+                  </div>
+                </div>
+
+                <div class="advisory-card" data-card="2">
+                  <button class="adv-check" data-check="2">✓</button>
+                  <div class="adv-body">
+                    <div class="adv-title">Inspect Leaf 12 for early blight</div>
+                    <div class="adv-desc">Terpene pattern resembles an early Phytophthora signature — confirm visually before treating.</div>
+                    <span class="adv-tag medium">Medium priority</span>
+                  </div>
+                </div>
+
+                <div class="advisory-card" data-card="3">
+                  <button class="adv-check" data-check="3">✓</button>
+                  <div class="adv-body">
+                    <div class="adv-title">Re-scan Zone D in 48 hours</div>
+                    <div class="adv-desc">Baseline sample only — no action needed until the next scheduled pass.</div>
+                    <span class="adv-tag low">Low priority</span>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            <nav class="tabbar">
+              <button class="tab active" data-tab="scan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#69766D" stroke-width="1.8"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+                Scan
+              </button>
+              <button class="tab" data-tab="map">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#69766D" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                Field Map
+              </button>
+              <button class="tab" data-tab="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#69766D" stroke-width="1.8"><path d="M3 20V4M3 20h18M7 16l4-5 3 3 5-7"/></svg>
+                History
+              </button>
+              <button class="tab" data-tab="advisory">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#69766D" stroke-width="1.8"><path d="M9 3h6l1 4H8l1-4Z"/><path d="M5 7h14l-1 14H6L5 7Z"/><path d="M9 12h6M9 16h4"/></svg>
+                Advisory
+              </button>
+            </nav>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="callouts right">
+      <div class="callout"><b>Multi-leaf scans</b> fuse into one field-level health map, not just a single-plant read.</div>
+      <div class="callout"><b>Alerts fire hours to days</b> before a stress or disease pattern becomes visible to the eye.</div>
+    </div>
+  </div>
+
+  <footer class="page-foot">
+    PhytoPulse Technologies Pvt. Ltd. — this is an illustrative product walkthrough built with mock data for demonstration purposes only.<br>
+    No sensor hardware, VOC readings, or field data shown here are real.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- Connect flow ---------------- */
+  var btnConnect = document.getElementById('btnConnect');
+  var scanStatus = document.getElementById('scanStatus');
+  var foundDevice = document.getElementById('foundDevice');
+  var btnPair = document.getElementById('btnPair');
+  var connectScreen = document.getElementById('connectScreen');
+  var appMain = document.getElementById('appMain');
+  var statusBleText = document.getElementById('statusBleText');
+
+  btnConnect.addEventListener('click', function(){
+    btnConnect.disabled = true;
+    btnConnect.style.opacity = 0.6;
+    scanStatus.innerHTML = '<span class="spinner"></span> Scanning for nearby PhytoPulse devices…';
+    setTimeout(function(){
+      scanStatus.textContent = '1 device found';
+      foundDevice.classList.add('show');
+    }, 1500);
+  });
+
+  btnPair.addEventListener('click', function(){
+    btnPair.textContent = 'Pairing…';
+    btnPair.disabled = true;
+    setTimeout(function(){
+      statusBleText.textContent = 'Paired';
+      connectScreen.style.display = 'none';
+      appMain.hidden = false;
+    }, 900);
+  });
+
+  var btnDisconnect = document.getElementById('btnDisconnect');
+  btnDisconnect.addEventListener('click', function(){
+    appMain.hidden = true;
+    connectScreen.style.display = 'flex';
+    btnConnect.disabled = false;
+    btnConnect.style.opacity = 1;
+    scanStatus.textContent = '';
+    foundDevice.classList.remove('show');
+    btnPair.textContent = 'Pair device';
+    btnPair.disabled = false;
+    statusBleText.textContent = 'Not paired';
+  });
+
+  /* ---------------- Tabs ---------------- */
+  var tabs = document.querySelectorAll('.tab');
+  var screens = {
+    scan: document.getElementById('screen-scan'),
+    map: document.getElementById('screen-map'),
+    history: document.getElementById('screen-history'),
+    advisory: document.getElementById('screen-advisory')
+  };
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      Object.keys(screens).forEach(function(key){
+        screens[key].hidden = (key !== tab.dataset.tab);
+      });
+    });
+  });
+
+  /* ---------------- Live wave ---------------- */
+  var waveLine = document.getElementById('waveLine');
+  var waveAmplitude = 6;
+  var waveColor = '#E0932E';
+  var t = 0;
+  function drawWave(){
+    var pts = [];
+    for (var x = 0; x <= 300; x += 6){
+      var y = 32 + Math.sin((x + t) / 18) * waveAmplitude + Math.sin((x + t) / 5) * (waveAmplitude * 0.18);
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    waveLine.setAttribute('points', pts.join(' '));
+    waveLine.setAttribute('stroke', waveColor);
+    t += 4;
+  }
+  drawWave();
+  if (!reduceMotion){
+    setInterval(drawWave, 90);
+  }
+
+  /* ---------------- Scan scenarios ---------------- */
+  var scenarios = [
+    {
+      key:'healthy', methanol:3.6, methBase:3.8, terpene:540, terpBase:530,
+      status:'healthy', title:'Healthy — no stress detected',
+      desc:'Readings fall within the normal range for this cultivar and growth stage.',
+      conf:94, amplitude:5
+    },
+    {
+      key:'n-moderate', methanol:12.4, methBase:3.8, terpene:890, terpBase:530,
+      status:'moderate', title:'Nitrogen stress — moderate',
+      desc:'Elevated methanol consistent with early-stage nitrogen deficiency. Recommend a soil nitrate check within 48 hrs.',
+      conf:87, amplitude:9
+    },
+    {
+      key:'n-severe', methanol:18.9, methBase:3.8, terpene:1240, terpBase:530,
+      status:'severe', title:'Nitrogen stress — severe',
+      desc:'Sustained high methanol and terpene output. Fertigation recommended before the next irrigation cycle.',
+      conf:91, amplitude:13
+    },
+    {
+      key:'pathogen', methanol:6.1, methBase:3.8, terpene:2100, terpBase:530,
+      status:'severe', title:'Pathogen-pattern detected — inspect leaf',
+      desc:'Terpene spike disproportionate to methanol resembles an early blight defensive signature.',
+      conf:78, amplitude:15
+    }
+  ];
+  var lastIndex = -1;
+
+  var valMethanol = document.getElementById('valMethanol');
+  var valTerpene = document.getElementById('valTerpene');
+  var trendMethanol = document.getElementById('trendMethanol');
+  var trendTerpene = document.getElementById('trendTerpene');
+  var statusBadge = document.getElementById('statusBadge');
+  var badgeTitle = document.getElementById('badgeTitle');
+  var badgeDesc = document.getElementById('badgeDesc');
+  var badgeConf = document.getElementById('badgeConf');
+  var btnSimulate = document.getElementById('btnSimulate');
+
+  function trendMarkup(current, base){
+    var diff = current - base;
+    var pct = Math.round((diff / base) * 100);
+    if (Math.abs(pct) < 8){
+      return { cls:'flat', text:'— close to ' + base + ' baseline' };
+    }
+    return { cls:'up', text:'▲ ' + pct + '% vs. ' + base + ' baseline' };
+  }
+
+  function applyScenario(sc){
+    valMethanol.textContent = sc.methanol.toFixed(1);
+    valTerpene.textContent = sc.terpene.toLocaleString();
+
+    var mt = trendMarkup(sc.methanol, sc.methBase);
+    trendMethanol.className = 'rtrend ' + mt.cls;
+    trendMethanol.textContent = mt.text;
+
+    var tt = trendMarkup(sc.terpene, sc.terpBase);
+    trendTerpene.className = 'rtrend ' + tt.cls;
+    trendTerpene.textContent = tt.text;
+
+    statusBadge.className = 'badge status-' + sc.status;
+    badgeTitle.textContent = sc.title;
+    badgeDesc.textContent = sc.desc;
+    badgeConf.textContent = 'Confidence: ' + sc.conf + '%';
+
+    waveAmplitude = sc.amplitude;
+    waveColor = sc.status === 'healthy' ? '#2F9E63' : (sc.status === 'moderate' ? '#E0932E' : '#B23A2E');
+  }
+
+  applyScenario(scenarios[0]);
+
+  btnSimulate.addEventListener('click', function(){
+    var idx;
+    do { idx = Math.floor(Math.random() * scenarios.length); } while (idx === lastIndex);
+    lastIndex = idx;
+    applyScenario(scenarios[idx]);
+  });
+
+  /* ---------------- Field map ---------------- */
+  var mapData = [
+    {id:1, status:'healthy', meth:3.9, terp:520, zone:'A'},
+    {id:2, status:'healthy', meth:3.4, terp:498, zone:'A'},
+    {id:3, status:'healthy', meth:4.1, terp:560, zone:'A'},
+    {id:4, status:'moderate', meth:11.2, terp:840, zone:'A'},
+    {id:5, status:'healthy', meth:3.7, terp:510, zone:'B'},
+    {id:6, status:'moderate', meth:13.5, terp:910, zone:'B'},
+    {id:7, status:'moderate', meth:14.2, terp:960, zone:'B'},
+    {id:8, status:'severe', meth:19.4, terp:1280, zone:'B'},
+    {id:9, status:'healthy', meth:4.0, terp:545, zone:'C'},
+    {id:10, status:'healthy', meth:3.6, terp:530, zone:'C'},
+    {id:11, status:'moderate', meth:12.8, terp:880, zone:'C'},
+    {id:12, status:'healthy', meth:3.8, terp:520, zone:'D'},
+    {id:13, status:'healthy', meth:4.2, terp:565, zone:'D'},
+    {id:14, status:'healthy', meth:3.5, terp:505, zone:'D'}
+  ];
+  var mapGrid = document.getElementById('mapGrid');
+  var nodeDetail = document.getElementById('nodeDetail');
+  var statusLabel = { healthy:'Healthy', moderate:'Nitrogen stress — moderate', severe:'Nitrogen stress — severe' };
+
+  mapData.forEach(function(leaf){
+    var btn = document.createElement('button');
+    btn.className = 'leaf-node ' + leaf.status;
+    btn.textContent = leaf.id;
+    btn.setAttribute('aria-label', 'Leaf ' + leaf.id + ', zone ' + leaf.zone + ', ' + statusLabel[leaf.status]);
+    btn.addEventListener('click', function(){
+      nodeDetail.innerHTML =
+        '<div class="nd-title">Leaf ' + leaf.id + ' · Zone ' + leaf.zone + '</div>' +
+        '<div>Methanol ' + leaf.meth.toFixed(1) + ' ppm · α-Pinene ' + leaf.terp.toLocaleString() + ' ppb</div>' +
+        '<div>' + statusLabel[leaf.status] + '</div>';
+    });
+    mapGrid.appendChild(btn);
+  });
+
+  /* ---------------- History chart ---------------- */
+  var history = [3.6,3.7,4.0,4.4,5.1,6.3,7.8,9.6,12.4,14.1,15.0,15.6,16.2,16.8];
+  var threshold = 10;
+  var chart = document.getElementById('historyChart');
+  var W = 300, H = 150, pad = 22;
+  var maxV = Math.max.apply(null, history) * 1.15;
+
+  function xFor(i){ return pad + (i / (history.length - 1)) * (W - pad * 2); }
+  function yFor(v){ return H - pad - (v / maxV) * (H - pad * 2); }
+
+  var svgParts = [];
+  // gridlines
+  svgParts.push('<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="#E2DCC8" stroke-width="1"/>');
+  // threshold dashed line
+  var yT = yFor(threshold);
+  svgParts.push('<line x1="'+pad+'" y1="'+yT+'" x2="'+(W-pad)+'" y2="'+yT+'" stroke="#B23A2E" stroke-width="1.4" stroke-dasharray="4 3" opacity="0.55"/>');
+  // methanol polyline
+  var linePts = history.map(function(v,i){ return xFor(i)+','+yFor(v); }).join(' ');
+  svgParts.push('<polyline points="'+linePts+'" fill="none" stroke="#1B5E3A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>');
+  // points
+  history.forEach(function(v,i){
+    svgParts.push('<circle cx="'+xFor(i)+'" cy="'+yFor(v)+'" r="2.4" fill="#1B5E3A"/>');
+  });
+  // Day 9 alert marker (index 8)
+  var ax = xFor(8), ay = yFor(history[8]);
+  svgParts.push('<circle cx="'+ax+'" cy="'+ay+'" r="5" fill="none" stroke="#B23A2E" stroke-width="2"/>');
+  svgParts.push('<text x="'+ax+'" y="'+(ay-10)+'" font-family="IBM Plex Mono" font-size="8" fill="#B23A2E" text-anchor="middle">ALERT · D9</text>');
+  // Day 12 visible symptom marker (index 11)
+  var bx = xFor(11), by = yFor(history[11]);
+  svgParts.push('<circle cx="'+bx+'" cy="'+by+'" r="3.2" fill="#69766D"/>');
+  svgParts.push('<text x="'+bx+'" y="'+(by-10)+'" font-family="IBM Plex Mono" font-size="8" fill="#69766D" text-anchor="middle">SEEN · D12</text>');
+  // axis labels
+  svgParts.push('<text x="'+pad+'" y="'+(H-6)+'" font-family="IBM Plex Mono" font-size="8" fill="#69766D">Day 1</text>');
+  svgParts.push('<text x="'+(W-pad)+'" y="'+(H-6)+'" font-family="IBM Plex Mono" font-size="8" fill="#69766D" text-anchor="end">Day 14</text>');
+
+  chart.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  chart.innerHTML = svgParts.join('');
+
+  /* ---------------- Advisory checks ---------------- */
+  document.querySelectorAll('.adv-check').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card = btn.closest('.advisory-card');
+      card.classList.toggle('done');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
