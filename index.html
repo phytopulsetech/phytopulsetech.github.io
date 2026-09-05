@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PhytoPulse — The Wearable Leaf Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EA;
+    --surface:#FFFFFF;
+    --ink:#1C2422;
+    --muted:#69766D;
+    --primary:#1B5E3A;
+    --primary-dark:#123D27;
+    --accent:#E0932E;
+    --accent-dark:#B8721C;
+    --leaf:#2F9E63;
+    --leaf-bg:#E7F3EA;
+    --amber-bg:#FBF1DE;
+    --line:#DED7C0;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 10% 6%, rgba(27,94,58,0.06), transparent 38%),
+      radial-gradient(circle at 92% 88%, rgba(224,147,46,0.08), transparent 42%);
+    pointer-events:none;
+    z-index:0;
+  }
+  a{color:inherit;}
+  img,svg{display:block;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  section{position:relative; z-index:1;}
+
+  h1,h2,h3{font-family:var(--font-display); margin:0; letter-spacing:-0.01em; color:var(--primary-dark);}
+  p{margin:0; line-height:1.6;}
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--primary);
+    letter-spacing:0.02em;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-body); font-weight:600; font-size:15px;
+    padding:13px 22px; border-radius:100px;
+    border:1.5px solid transparent;
+    cursor:pointer; text-decoration:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--primary); color:#fff;}
+  .btn-primary:hover{box-shadow:0 10px 24px -10px rgba(18,61,39,0.55);}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--primary-dark);}
+  .btn-ghost:hover{border-color:var(--primary);}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(245,243,234,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+    max-width:1180px; margin:0 auto;
+    gap:20px;
+  }
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand svg{width:26px; height:26px; flex:none;}
+  .brand-name{font-family:var(--font-display); font-weight:700; font-size:19px;}
+  .brand-name span{color:var(--accent);}
+  .nav-links{display:flex; gap:26px; font-size:14.5px; font-weight:500;}
+  .nav-links a{text-decoration:none; color:var(--muted); transition:color .15s ease;}
+  .nav-links a:hover{color:var(--primary-dark);}
+  .nav-cta{display:flex; align-items:center; gap:14px;}
+  .nav-cta .btn{padding:10px 18px; font-size:14px;}
+  @media (max-width:820px){ .nav-links{display:none;} }
+
+  /* ---------- Hero ---------- */
+  .hero{padding:72px 0 40px;}
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:36px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(34px, 5vw, 56px);
+    line-height:1.06;
+    margin-top:16px;
+  }
+  .hero-sub{
+    font-size:17.5px; color:var(--muted); max-width:480px;
+    margin-top:20px; line-height:1.65;
+  }
+  .hero-actions{display:flex; gap:14px; margin-top:30px; flex-wrap:wrap;}
+  .hero-art{position:relative;}
+  .hero-art svg{width:100%; height:auto;}
+
+  .pulse-path{fill:none; stroke:var(--accent); stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round;}
+  .pulse-glow{
+    fill:none; stroke:var(--accent-dark); stroke-width:5.5; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:44 900; stroke-dashoffset:0;
+    animation:travel 3.4s linear infinite;
+    filter:drop-shadow(0 0 6px rgba(224,147,46,0.55));
+  }
+  @keyframes travel{
+    from{stroke-dashoffset:0;}
+    to{stroke-dashoffset:-944;}
+  }
+  .leaf-outline{fill:rgba(47,158,99,0.07); stroke:var(--primary); stroke-width:3;}
+  .vein{stroke:rgba(27,94,58,0.28); stroke-width:1.6; fill:none;}
+  @media (prefers-reduced-motion: reduce){
+    .pulse-glow{animation:none;}
+  }
+
+  .stat-strip{
+    margin-top:52px;
+    display:grid; grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--line);
+    padding-top:26px;
+  }
+  .stat-strip div{padding-right:20px;}
+  .stat-num{font-family:var(--font-display); font-size:27px; font-weight:700; color:var(--primary-dark);}
+  .stat-label{font-size:13.5px; color:var(--muted); margin-top:4px; line-height:1.45;}
+  @media (max-width:720px){
+    .hero-grid{grid-template-columns:1fr;}
+    .stat-strip{grid-template-columns:1fr; gap:16px;}
+  }
+
+  /* ---------- Section headers ---------- */
+  .section-head{max-width:600px; margin-bottom:44px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px); margin-top:10px;}
+  .section-head p{color:var(--muted); font-size:16px; margin-top:14px;}
+
+  /* ---------- Problem / detection gap ---------- */
+  .problem{padding:88px 0; background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .problem-grid{display:grid; grid-template-columns:0.85fr 1.15fr; gap:52px; align-items:center;}
+  .problem-copy p{color:var(--muted); font-size:16px; margin-top:14px;}
+  .problem-copy .callout{
+    margin-top:26px; padding:16px 18px; border-radius:14px;
+    background:var(--leaf-bg); border:1px solid #cfe6d6;
+    font-size:14.5px; color:var(--primary-dark);
+  }
+  .chart-card{
+    background:var(--bg); border:1px solid var(--line); border-radius:20px;
+    padding:26px 26px 20px;
+  }
+  .chart-card .chart-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .chart-card h4{font-family:var(--font-display); font-size:15px; margin:0; color:var(--primary-dark);}
+  .chart-card .chart-tag{font-family:var(--font-mono); font-size:11.5px; color:var(--muted);}
+  #gapChart{width:100%; height:auto;}
+  .gap-line{fill:none; stroke:var(--primary); stroke-width:3; stroke-linecap:round;}
+  .gap-thresh{fill:none; stroke:var(--muted); stroke-width:1.3; stroke-dasharray:5 5;}
+  .gap-marker{fill:var(--accent); stroke:var(--surface); stroke-width:2;}
+  .gap-marker.late{fill:var(--ink);}
+  .gap-label{font-family:var(--font-mono); font-size:10.5px; fill:var(--muted);}
+  .gap-label.alert{fill:var(--accent-dark); font-weight:600;}
+  .draw{stroke-dasharray:900; stroke-dashoffset:900; transition:stroke-dashoffset 1.6s ease;}
+  .draw.in-view{stroke-dashoffset:0;}
+  .fade-marker{opacity:0; transform:translateY(4px); transition:opacity .5s ease, transform .5s ease;}
+  .fade-marker.in-view{opacity:1; transform:translateY(0);}
+  @media (max-width:820px){ .problem-grid{grid-template-columns:1fr;} }
+
+  /* ---------- How it works ---------- */
+  .stack{padding:96px 0;}
+  .flow{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:0; margin-top:20px;
+  }
+  .flow-step{
+    position:relative;
+    background:var(--surface); border:1px solid var(--line);
+    padding:26px 22px 24px;
+  }
+  .flow-step:first-child{border-radius:18px 0 0 18px;}
+  .flow-step:last-child{border-radius:0 18px 18px 0;}
+  .flow-step + .flow-step{border-left:none;}
+  .flow-step .step-no{font-family:var(--font-mono); font-size:12px; color:var(--muted);}
+  .flow-step .step-icon{width:38px; height:38px; margin:14px 0 12px;}
+  .flow-step h4{font-family:var(--font-display); font-size:16.5px; margin:0 0 8px;}
+  .flow-step p{font-size:13.8px; color:var(--muted); line-height:1.55;}
+  .flow-arrow{
+    display:none;
+  }
+  @media (max-width:900px){
+    .flow{grid-template-columns:1fr; gap:14px;}
+    .flow-step{border-radius:16px !important; border-left:1px solid var(--line) !important;}
+  }
+  .stack-foot{
+    margin-top:24px; padding:16px 20px; border-radius:14px;
+    background:var(--amber-bg); border:1px solid #f1ddb5;
+    font-size:14.5px; color:#5a3a10; display:flex; gap:10px; align-items:flex-start;
+  }
+
+  /* ---------- Products ---------- */
+  .products{padding:0 0 96px;}
+  .product-grid{display:grid; grid-template-columns:1fr 1fr; gap:26px;}
+  .product-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:22px;
+    padding:32px; display:flex; flex-direction:column;
+  }
+  .product-card .tag{
+    font-family:var(--font-mono); font-size:11.5px; color:var(--primary);
+    background:var(--leaf-bg); border:1px solid #cfe6d6; padding:5px 11px; border-radius:100px;
+    width:fit-content;
+  }
+  .product-card svg.icon{width:100%; height:150px; margin:22px 0;}
+  .product-card h3{font-size:21px; margin-bottom:8px;}
+  .product-card p{color:var(--muted); font-size:14.8px; margin-bottom:16px;}
+  .spec-row{display:flex; justify-content:space-between; font-size:13px; padding:9px 0; border-top:1px solid var(--line);}
+  .spec-row span:first-child{color:var(--muted);}
+  .spec-row span:last-child{font-family:var(--font-mono); color:var(--ink); font-weight:500;}
+  @media (max-width:820px){ .product-grid{grid-template-columns:1fr;} }
+
+  /* ---------- Impact / Odisha ---------- */
+  .impact{padding:88px 0; background:var(--primary-dark); color:#eef3ef;}
+  .impact .section-head h2, .impact .eyebrow{color:#fff;}
+  .impact .section-head p{color:#bcd0c3;}
+  .impact-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    border-top:1px solid rgba(255,255,255,0.16);
+  }
+  .impact-cell{padding:26px 22px 26px 0; border-right:1px solid rgba(255,255,255,0.16);}
+  .impact-cell:last-child{border-right:none;}
+  .impact-num{font-family:var(--font-display); font-weight:700; font-size:30px; color:var(--accent);}
+  .impact-label{font-size:13.5px; color:#c6d8cd; margin-top:6px; line-height:1.5;}
+  @media (max-width:820px){
+    .impact-grid{grid-template-columns:1fr 1fr; row-gap:24px;}
+    .impact-cell{border-right:none; border-bottom:1px solid rgba(255,255,255,0.16); padding-bottom:20px;}
+  }
+
+  /* ---------- Invest / footer ---------- */
+  .invest{padding:96px 0 60px;}
+  .invest-grid{display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start;}
+  .ask-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:30px;
+  }
+  .ask-amount{font-family:var(--font-display); font-size:38px; font-weight:700; color:var(--primary-dark);}
+  .ask-sub{font-size:14px; color:var(--muted); margin-top:6px;}
+  .fund-bar{margin-top:22px;}
+  .fund-row{margin-bottom:14px;}
+  .fund-row .lbl{display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;}
+  .fund-row .lbl span:last-child{font-family:var(--font-mono); color:var(--muted);}
+  .fund-track{height:7px; background:var(--leaf-bg); border-radius:100px; overflow:hidden;}
+  .fund-fill{height:100%; background:var(--primary); border-radius:100px;}
+  .docs h4{font-family:var(--font-display); font-size:15px; margin-bottom:14px; color:var(--primary-dark);}
+  .doc-link{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border:1px solid var(--line); border-radius:14px;
+    background:var(--surface); text-decoration:none; margin-bottom:12px;
+    transition:border-color .15s ease;
+  }
+  .doc-link:hover{border-color:var(--primary);}
+  .doc-link .doc-name{font-weight:600; font-size:14.5px; color:var(--primary-dark);}
+  .doc-link .doc-desc{font-size:12.8px; color:var(--muted); margin-top:2px;}
+  .doc-link svg{width:18px; height:18px; stroke:var(--primary); flex:none;}
+  @media (max-width:820px){ .invest-grid{grid-template-columns:1fr;} }
+
+  footer{
+    border-top:1px solid var(--line); padding:30px 0 40px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  footer .foot-brand{display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:15px;}
+  footer .foot-brand svg{width:20px; height:20px;}
+  footer .foot-meta{font-size:12.8px; color:var(--muted); text-align:right;}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 12 C25 30 25 70 50 88 C75 70 75 30 50 12 Z" stroke="#1B5E3A" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M8 50 H34 L40 32 L48 66 L56 50 H92" stroke="#E0932E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Phyto<span>Pulse</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#problem">The problem</a>
+      <a href="#how">How it works</a>
+      <a href="#products">Hardware</a>
+      <a href="#impact">Impact</a>
+      <a href="#invest">Invest</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="#invest">Fund the pilot</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">In-planta physiological intelligence</span>
+      <h1>Every leaf<br>has a pulse.</h1>
+      <p class="hero-sub">PhytoPulse reads the volatile compounds a stressed plant releases through its own leaf tissue — nitrogen deficiency, water stress, early blight — up to 72 hours before any of it is visible to the eye.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="phytopulse_demo.html">See the sensor in action</a>
+        <a class="btn btn-ghost" href="#how">How it works</a>
+      </div>
+      <div class="stat-strip">
+        <div>
+          <div class="stat-num">72 hrs</div>
+          <div class="stat-label">ahead of the first visible symptom</div>
+        </div>
+        <div>
+          <div class="stat-num">₹290 Bn</div>
+          <div class="stat-label">lost yearly to pests &amp; disease across Indian agriculture</div>
+        </div>
+        <div>
+          <div class="stat-num">2 min</div>
+          <div class="stat-label">to walk a plot and scan multiple leaves by hand</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path class="leaf-outline" d="M400 40 C 210 130 150 340 400 480 C 650 340 590 130 400 40 Z"/>
+        <path class="vein" d="M400 60 L 400 460"/>
+        <path class="vein" d="M400 150 L 300 190"/>
+        <path class="vein" d="M400 190 L 320 240"/>
+        <path class="vein" d="M400 230 L 300 290"/>
+        <path class="vein" d="M400 270 L 320 335"/>
+        <path class="vein" d="M400 150 L 500 190"/>
+        <path class="vein" d="M400 190 L 480 240"/>
+        <path class="vein" d="M400 230 L 500 290"/>
+        <path class="vein" d="M400 270 L 480 335"/>
+        <path class="pulse-path" d="M20 300 L 260 300 L 300 300 L 335 210 L 370 400 L 400 250 L 430 300 L 780 300"/>
+        <path class="pulse-glow" d="M20 300 L 260 300 L 300 300 L 335 210 L 370 400 L 400 250 L 430 300 L 780 300"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="problem" id="problem">
+  <div class="wrap problem-grid">
+    <div class="problem-copy">
+      <span class="eyebrow">The detection gap</span>
+      <h2 style="margin-top:10px; font-size:clamp(24px,3vw,32px);">By the time a leaf looks sick, the disease is already several cycles deep.</h2>
+      <p>Late blight and other fast fungal infections can re-infect a whole polyhouse within 24–48 hours. Soil probes measure what's in the ground, not what the plant absorbed. Satellites and drones show canopy damage only after it's already visible — and the marketable window has usually closed by then.</p>
+      <div class="callout">PhytoPulse measures the plant's own biochemical signal directly from the leaf, so an alert can fire while the plant is still stressed but not yet damaged.</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h4>Leaf methanol signal — tomato, Block C</h4>
+        <span class="chart-tag">14-day trend</span>
+      </div>
+      <svg id="gapChart" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+        <line class="gap-thresh" x1="50" y1="130" x2="570" y2="130"/>
+        <text class="gap-label" x="52" y="122">alert threshold</text>
+        <path class="gap-line draw" id="gapLine" d="M50 220 L110 214 L170 202 L230 178 L290 138 L320 108 L350 88 L400 62 L460 50 L560 42"/>
+        <g class="fade-marker" id="markerAlert">
+          <circle class="gap-marker" cx="290" cy="138" r="6"/>
+          <text class="gap-label alert" x="230" y="165">Day 9 — PhytoPulse alert fires</text>
+        </g>
+        <g class="fade-marker" id="markerLate">
+          <circle class="gap-marker late" cx="400" cy="62" r="6"/>
+          <text class="gap-label" x="405" y="45">Day 12 — visible chlorosis noticed</text>
+        </g>
+        <text class="gap-label" x="50" y="260">Day 1</text>
+        <text class="gap-label" x="545" y="260">Day 14</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="stack" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Architecture</span>
+      <h2>Four layers, no gateway hardware.</h2>
+      <p>Compute goes to the two places already sitting in the field: the sensor's own chip, and the phone in the farmer's pocket. No dedicated LoRaWAN gateway, no SIM card, no app-store install.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <span class="step-no">Sensing</span>
+        <svg class="step-icon" viewBox="0 0 40 40" fill="none"><path d="M20 6 C10 13 10 27 20 35 C30 27 30 13 20 6 Z" stroke="#1B5E3A" stroke-width="2.2"/><path d="M20 12 L20 30" stroke="#1B5E3A" stroke-width="1.4"/></svg>
+        <h4>Leaf-clip or scan-probe</h4>
+        <p>A chemiresistive sensor reads methanol and terpene VOCs straight from the leaf surface — continuously from a clip, or in a 20–30 second handheld scan.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">Edge compute</span>
+        <svg class="step-icon" viewBox="0 0 40 40" fill="none"><rect x="10" y="10" width="20" height="20" rx="3" stroke="#1B5E3A" stroke-width="2.2"/><path d="M15 10V5M25 10V5M15 35V30M25 35V30M10 15H5M10 25H5M35 15H30M35 25H30" stroke="#1B5E3A" stroke-width="1.6"/></svg>
+        <h4>ESP32 on-sensor chip</h4>
+        <p>One commodity chip handles the ADC, BLE radio and humidity compensation — no separate microcontroller or connectivity module to source or certify.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">On-phone</span>
+        <svg class="step-icon" viewBox="0 0 40 40" fill="none"><rect x="12" y="6" width="16" height="28" rx="3" stroke="#1B5E3A" stroke-width="2.2"/><path d="M17 30h6" stroke="#1B5E3A" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <h4>Progressive Web App</h4>
+        <p>Pairs over Web Bluetooth in a browser tab. The triage model runs on-device, so a raw reading never has to leave the farmer's phone to produce an answer.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">Cloud (opt-in)</span>
+        <svg class="step-icon" viewBox="0 0 40 40" fill="none"><path d="M12 26a6 6 0 0 1-1-11.9A8 8 0 0 1 27 12a6.5 6.5 0 0 1-1 14H12Z" stroke="#1B5E3A" stroke-width="2.2"/></svg>
+        <h4>Signature library</h4>
+        <p>An anonymised stress score, not raw data, can sync to a shared Odisha-calibrated VOC library — the dataset that gets harder to replicate with every acre covered.</p>
+      </div>
+    </div>
+    <div class="stack-foot">
+      <span>Honest caveat:</span>&nbsp;Web Bluetooth doesn't run on Safari/iOS today. Phase 1 goes Android-first, matching the device mix of Odisha's target smallholder segment, with an iOS bridge scoped for Phase 3.
+    </div>
+  </div>
+</section>
+
+<section class="products" id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Two form factors, one sensor chemistry</span>
+      <h2>Start with a spot-check. Upgrade to continuous.</h2>
+      <p>Both devices share the same VOC chemistry and the same on-device model, so a customer can move from occasional scans to unattended monitoring on their highest-value blocks without switching platforms.</p>
+    </div>
+    <div class="product-grid">
+      <div class="product-card">
+        <span class="tag">Continuous mode</span>
+        <svg class="icon" viewBox="0 0 300 150" fill="none">
+          <path d="M60 75 C60 55 80 45 100 50 L100 30 L112 30 L112 50 C130 46 148 56 148 75" stroke="#1B5E3A" stroke-width="2.4"/>
+          <ellipse cx="100" cy="90" rx="44" ry="26" stroke="#2F9E63" stroke-width="2.4"/>
+          <line x1="60" y1="75" x2="66" y2="98" stroke="#E0932E" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h3>Wearable leaf-clip</h3>
+        <p>Clips onto a single leaf and monitors it continuously for the length of a crop cycle — built for unattended greenhouse and orchard blocks.</p>
+        <div class="spec-row"><span>Chip</span><span>ESP32-C3</span></div>
+        <div class="spec-row"><span>Radio</span><span>BLE 5.0 GATT</span></div>
+        <div class="spec-row"><span>Best for</span><span>Polyhouse, betel vine</span></div>
+      </div>
+      <div class="product-card">
+        <span class="tag">Spot-check mode</span>
+        <svg class="icon" viewBox="0 0 300 150" fill="none">
+          <path d="M110 55 L165 55 C178 55 185 62 185 72 L185 82 C185 92 178 98 165 98 L128 98 L128 118 L112 118 L112 98 L100 98 C93 98 88 93 88 86 L88 70" stroke="#1B5E3A" stroke-width="2.4" stroke-linejoin="round"/>
+          <circle cx="150" cy="76" r="10" stroke="#E0932E" stroke-width="2.4"/>
+        </svg>
+        <h3>Handheld scan-probe</h3>
+        <p>A pistol-grip device that presses a sealed chamber to a leaf for a 20–30 second read — walk a plot, sample multiple leaves, get a field map.</p>
+        <div class="spec-row"><span>Chip</span><span>ESP32-S3</span></div>
+        <div class="spec-row"><span>Scan time</span><span>20–30 sec</span></div>
+        <div class="spec-row"><span>Best for</span><span>Field technicians, FPOs</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="impact" id="impact">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Why Odisha, first</span>
+      <h2>Launching where an early signal is worth the most.</h2>
+      <p>92%+ of Odisha's operational holdings sit under 2 hectares, and 79% of cropped area is rainfed — conditions where a plant-direct stress signal matters more than a static soil reading.</p>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-cell">
+        <div class="impact-num">73–76%</div>
+        <div class="impact-label">of Odisha's population depends on agriculture for its livelihood</div>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-num">676K ha</div>
+        <div class="impact-label">under vegetable cultivation — the state's largest single crop category by area</div>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-num">~21%</div>
+        <div class="impact-label">of cropped area is irrigated; the rest runs on rainfall the grower can't control</div>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-num">100%</div>
+        <div class="impact-label">documented total-loss late blight outbreaks on resistant tomato cultivars since 2008</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="invest" id="invest">
+  <div class="wrap invest-grid">
+    <div class="ask-card">
+      <span class="eyebrow">The ask</span>
+      <div class="ask-amount" style="margin-top:8px;">₹16.5 lakh</div>
+      <div class="ask-sub">Seed capital to move from lab-validated prototype to a field-deployed, ICAR/KVK-validated commercial product within 24 months.</div>
+      <div class="fund-bar">
+        <div class="fund-row">
+          <div class="lbl"><span>Hardware R&amp;D &amp; engineering</span><span>28%</span></div>
+          <div class="fund-track"><div class="fund-fill" style="width:28%;"></div></div>
+        </div>
+        <div class="fund-row">
+          <div class="lbl"><span>PWA &amp; on-device ML build-out</span><span>24%</span></div>
+          <div class="fund-track"><div class="fund-fill" style="width:24%;"></div></div>
+        </div>
+        <div class="fund-row">
+          <div class="lbl"><span>Field trials &amp; agronomic validation</span><span>22%</span></div>
+          <div class="fund-track"><div class="fund-fill" style="width:22%;"></div></div>
+        </div>
+        <div class="fund-row">
+          <div class="lbl"><span>Team</span><span>16%</span></div>
+          <div class="fund-track"><div class="fund-fill" style="width:16%;"></div></div>
+        </div>
+        <div class="fund-row">
+          <div class="lbl"><span>GTM, certification &amp; working capital</span><span>10%</span></div>
+          <div class="fund-track"><div class="fund-fill" style="width:10%;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="docs">
+      <h4>Read the full case</h4>
+      <a class="doc-link" href="PhytoPulse_Investor_Memorandum.pdf">
+        <div>
+          <div class="doc-name">Investor memorandum</div>
+          <div class="doc-desc">Full 24-page proposal — market, architecture, financials</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+      </a>
+      <a class="doc-link" href="phytopulse_demo.html">
+        <div>
+          <div class="doc-name">Interactive app demo</div>
+          <div class="doc-desc">Walk through pairing a sensor and reading a field map — mock data</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14m0 0l-5-5m5 5l-5 5"/></svg>
+      </a>
+      <a class="doc-link" href="mailto:hello@phytopulse.in">
+        <div>
+          <div class="doc-name">Talk to the team</div>
+          <div class="doc-desc">Gourab Khadanga · Science College (Autonomous), Hinjilicut</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14m0 0l-5-5m5 5l-5 5"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <footer>
+      <div class="foot-brand">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M50 12 C25 30 25 70 50 88 C75 70 75 30 50 12 Z" stroke="#1B5E3A" stroke-width="6" stroke-linejoin="round"/>
+          <path d="M8 50 H34 L40 32 L48 66 L56 50 H92" stroke="#E0932E" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        PhytoPulse
+      </div>
+      <div class="foot-meta">The Wearable Leaf Platform · Odisha, India<br>Submitted for the Innovation Startup Competition · under mentorship of Dr. Sujata Mahapatra</div>
+    </footer>
+  </div>
+</section>
+
+<script>
+  // Draw the detection-gap chart once it enters view, one orchestrated reveal.
+  const gapCard = document.querySelector('.chart-card');
+  const line = document.getElementById('gapLine');
+  const m1 = document.getElementById('markerAlert');
+  const m2 = document.getElementById('markerLate');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        line.classList.add('in-view');
+        setTimeout(()=>m1.classList.add('in-view'), 900);
+        setTimeout(()=>m2.classList.add('in-view'), 1500);
+        io.disconnect();
+      }
+    });
+  }, {threshold:0.4});
+  io.observe(gapCard);
+</script>
+
+</body>
+</html>
